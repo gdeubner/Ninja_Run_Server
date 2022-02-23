@@ -53,6 +53,7 @@ async def new_user(var_un: str, var_pw: str, var_lb: float, var_ft: int, var_in:
     query = ('INSERT INTO User ' +
                 '(username,password,weight,height_ft,height_in,points,total_calories,total_distance,Name,IsAdmin)' +
                 ' VALUES ("' + var_un + '","' + var_pw + '",' + str(var_lb) + ',' + str(var_ft) + ',' + str(var_in) + ',' + str(var_pts) + ',' + str(var_cals) + ',' + str(var_dist) + ',"joe",0);')
+
 @app.get("/user_stats/")
 async def user_info(user_id: int):
     cur.execute('SELECT * FROM User ' + 
