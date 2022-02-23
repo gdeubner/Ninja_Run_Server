@@ -32,11 +32,11 @@ async def update_user(var_uid: int, var_dist: float,var_cal: int):
     return "success" 
 
 @app.get("/send_route")
-async def send_route(var_start: float, var_end: float, var_town: str, var_dist: float, var_uid: int, var_routf: bytes = File(...)):
+async def send_route(var_lat_start: float, var_long_start: float, var_lat_end: float, var_long_end: float, var_town: str, var_dist: float, var_uid: int, var_routf: bytes = File(...)):
     cur.execute('INSERT INTO Routes' +
-                '(start,end,town,distance,route_f,user_id)' +
+                '(town,distance,route_f,user_id,lat_start,long_start,lat_end,long_end)' +
                 'VALUES' + 
-                '(' + str(var_start) + ',' + str(var_end) + ',"' + var_town + '",' + str(var_dist) + ',' + str(var_routf) + ',' + str(var_uid) + ');')
+                '(' + var_town + '",' + str(var_dist) + ',' + str(var_routf) + ',' + str(var_uid) + ',' + str(var_lat_start) + ',' + str(var_long_start) + ',' + str(var_lat_end) + ',' + str(var_long_end) + ');')
     return "success"
 
 @app.get("/user_info/")
