@@ -47,12 +47,26 @@ async def user_info(user_id: int):
                 'WHERE u,user_id = "' + str(user_id) + '";')
     results = list(cur)
     return results
-
+ 
 @app.get("/new_user/")
 async def new_user(var_un: str, var_pw: str, var_lb: float, var_ft: int, var_in: float, var_pts: int, var_cals: int, var_dist: float):
     query = ('INSERT INTO User ' +
                 '(username,password,weight,height_ft,height_in,points,total_calories,total_distance,Name,IsAdmin)' +
                 ' VALUES ("' + var_un + '","' + var_pw + '",' + str(var_lb) + ',' + str(var_ft) + ',' + str(var_in) + ',' + str(var_pts) + ',' + str(var_cals) + ',' + str(var_dist) + ',"joe",0);')
+@app.get("/user_stats/")
+async def user_info(user_id: int):
+    cur.execute('SELECT * FROM User ' + 
+                'WHERE user_id = "' + str(user_id) + '";')
+    results = cur
+    return results  
+
+@app.get("/user_login/")
+async def user_info(user_id: int):
+    cur.execute('SELECT user_id FROM User ' + 
+                'WHERE username = "' + str(username) + '" AND password = "'+str(password)+'";')
+    results = cur
+    return results   
+    
     try:
         cur.execute(query)
         conn.commit()
