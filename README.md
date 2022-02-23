@@ -2,12 +2,12 @@ INSTALLATION GUIDE:
 
 DEPENDENCIES: (Install these before running the program)
 
-pip install httptools==0.1.0
-sudo apt-get update -y
-sudo apt-get install -y libmariadb-dev
-pip3 install mariadb
-pip install "fastapi[all]"
-pip install "uvicorn[standard]"
+pip install httptools==0.1.0;
+sudo apt-get update -y;
+sudo apt-get install -y libmariadb-dev;
+pip3 install mariadb;
+pip install "fastapi[all]";
+pip install "uvicorn[standard]";
 
 STARTING THE SERVER:
 
