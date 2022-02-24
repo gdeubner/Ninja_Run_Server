@@ -47,20 +47,25 @@ async def send_route(var_lat_start: float, var_long_start: float, var_lat_end: f
                 '(town,distance,route_f,user_id,lat_start,long_start,lat_end,long_end)' +
                 'VALUES' + 
                 '(' + var_town + '",' + str(var_dist) + ',' + str(var_routf) + ',' + str(var_uid) + ',' + str(var_lat_start) + ',' + str(var_long_start) + ',' + str(var_lat_end) + ',' + str(var_long_end) + ');')
+    try:
+        conn.commit()
+    except mariadb.Error as e:
+        print(f"Error: {e}")
+        return "fail"
     return "success"
 
 @app.get("/user_info/")
-async def user_info(user_id: int):
+async def user_info(username: str):
     query = ('SELECT * FROM User u' + 
                 ' INNER JOIN History h' + 
                 ' ON u.user_id = h.user_id' + 
-                ' WHERE u.user_id = ' + str(user_id) + ';')
+                ' WHERE u.username = "' + username + '";')
     cur.execute(query)
     columns = [column[0] for column in cur.description]
     results = []
     for row in cur.fetchall():
         results.append(dict(zip(columns,row)))
-    query = ('SELECT * FROM User u WHERE u.user_id = ' + str(user_id) + ';')
+    query = ('SELECT * FROM User u WHERE u.username = "' + username + '";')
     cur.execute(query)
     columns = [column[0] for column in cur.description]
     results2 = []
@@ -75,20 +80,6 @@ async def new_user(var_un: str, var_pw: str, var_lb: float, var_ft: int, var_in:
                 '(username,password,weight,height_ft,height_in,points,total_calories,total_distance,Name,IsAdmin)' +
                 ' VALUES ("' + var_un + '","' + var_pw + '",' + str(var_lb) + ',' + str(var_ft) + ',' + str(var_in) + ',' + str(var_pts) + ',' + str(var_cals) + ',' + str(var_dist) + ',"' + var_nam + '",' + str(var_adm) + ');')
 
-@app.get("/user_stats/")
-async def user_stats(user_id: int):
-    cur.execute('SELECT * FROM User ' + 
-                'WHERE user_id = "' + str(user_id) + '";')
-    results = cur
-    return results  
-
-@app.get("/user_login/")
-async def user_login(user_id: int):
-    cur.execute('SELECT user_id FROM User ' + 
-                'WHERE username = "' + str(username) + '" AND password = "'+str(password)+'";')
-    results = cur
-    return results   
-    
     try:
         cur.execute(query)
         conn.commit()
@@ -97,5 +88,17 @@ async def user_login(user_id: int):
         return "fail"
     return "success"
 
+@app.get("/user_stats/")
+async def user_stats(username: str):
+    cur.execute('SELECT * FROM User ' + 
+                'WHERE username = "' + username + '";')
+    results = list(cur)
+    return results  
 
+@app.get("/user_login/")
+async def user_login(username: str,password: str):
+    cur.execute('SELECT user_id FROM User ' + 
+                'WHERE username = "' + username + '" AND password = "'+ password +'";')
+    results = list(cur)
+    return results   
 
