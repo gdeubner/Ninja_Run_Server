@@ -51,7 +51,6 @@ async def send_route(var_lat_start: float, var_long_start: float, var_lat_end: f
 
 @app.get("/user_info/")
 async def user_info(user_id: int):
-<<<<<<< HEAD
     query = ('SELECT * FROM User u' + 
                 ' INNER JOIN History h' + 
                 ' ON u.user_id = h.user_id' + 
@@ -74,18 +73,17 @@ async def user_info(user_id: int):
 async def new_user(var_un: str, var_pw: str, var_lb: float, var_ft: int, var_in: float, var_pts: int, var_cals: int, var_dist: float,var_nam: str, var_adm: int):
     query = ('INSERT INTO User ' +
                 '(username,password,weight,height_ft,height_in,points,total_calories,total_distance,Name,IsAdmin)' +
-<<<<<<< HEAD
                 ' VALUES ("' + var_un + '","' + var_pw + '",' + str(var_lb) + ',' + str(var_ft) + ',' + str(var_in) + ',' + str(var_pts) + ',' + str(var_cals) + ',' + str(var_dist) + ',"' + var_nam + '",' + str(var_adm) + ');')
 
 @app.get("/user_stats/")
-async def user_info(user_id: int):
+async def user_stats(user_id: int):
     cur.execute('SELECT * FROM User ' + 
                 'WHERE user_id = "' + str(user_id) + '";')
     results = cur
     return results  
 
 @app.get("/user_login/")
-async def user_info(user_id: int):
+async def user_login(user_id: int):
     cur.execute('SELECT user_id FROM User ' + 
                 'WHERE username = "' + str(username) + '" AND password = "'+str(password)+'";')
     results = cur
