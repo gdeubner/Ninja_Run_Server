@@ -43,10 +43,11 @@ async def update_user(var_uid: int, var_dist: float,var_cal: int):
 
 @app.get("/send_route")
 async def send_route(var_lat_start: float, var_long_start: float, var_lat_end: float, var_long_end: float, var_town: str, var_dist: float, var_uid: int, var_routf: str):
-    cur.execute('INSERT INTO Routes' +
+    query = ('INSERT INTO Routes' +
                 ' (town,distance,user_id,lat_start,long_start,lat_end,long_end,route_f)' +
                 ' VALUES' + 
-                ' (' + var_town + '",' + str(var_dist) +  ',' + str(var_uid) + ',' + str(var_lat_start) + ',' + str(var_long_start) + ',' + str(var_lat_end) + ',' + str(var_long_end) + ',"' + var_routf +  '");')
+                ' ("' + var_town + '",' + str(var_dist) +  ',' + str(var_uid) + ',' + str(var_lat_start) + ',' + str(var_long_start) + ',' + str(var_lat_end) + ',' + str(var_long_end) + ',"' + var_routf +  '");')
+    cur.execute(query)
     try:
         conn.commit()
     except mariadb.Error as e:
