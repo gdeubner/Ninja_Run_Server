@@ -92,7 +92,7 @@ async def new_user(var_un: str, var_pw: str, var_lb: float, var_ft: int, var_in:
 @app.get("/user_stats/")
 async def user_stats(user_id: int):
     cur.execute('SELECT * FROM User ' + 
-                'WHERE user_id = "' + str(user_id) + '";')
+                'WHERE user_id = ' + str(user_id) + ';')
     results = list(cur)
     return results  
 
