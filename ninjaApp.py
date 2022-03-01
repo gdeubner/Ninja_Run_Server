@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, Body
 import mariadb
 import sys
 import json
@@ -41,8 +41,8 @@ async def update_user(var_uid: int, var_dist: float,var_cal: int):
         return "fail"
     return "success"
 
-@app.get("/send_route")
-async def send_route(var_lat_start: float, var_long_start: float, var_lat_end: float, var_long_end: float, var_town: str, var_dist: float, var_uid: int, var_routf: str):
+@app.post("/send_route")
+async def send_route(var_lat_start: float, var_long_start: float, var_lat_end: float, var_long_end: float, var_town: str, var_dist: float, var_uid: int, var_routf: str = Body(...)):
     query = ('INSERT INTO Routes' +
                 ' (town,distance,user_id,lat_start,long_start,lat_end,long_end,route_f)' +
                 ' VALUES' + 
@@ -90,9 +90,9 @@ async def new_user(var_un: str, var_pw: str, var_lb: float, var_ft: int, var_in:
     return "success"
 
 @app.get("/user_stats/")
-async def user_stats(user_id: int):
+async def user_stats(username: str):
     cur.execute('SELECT * FROM User ' + 
-                'WHERE user_id = ' + str(user_id) + ';')
+                'WHERE username = "' + username + '";')
     results = list(cur)
     return results  
 
