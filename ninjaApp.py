@@ -103,3 +103,13 @@ async def user_login(username: str,password: str):
     results = list(cur)
     return results   
 
+@app.get("/route_info/")
+async def route_info(user_id : int):
+    query = ('SELECT * FROM Routes ' + 
+                'WHERE user_id = ' + str(user_id) + ';')
+    cur.execute(query)
+    columns = [column[0] for column in cur.description]
+    results = []
+    for row in cur.fetchall():
+        results.append(dict(zip(columns,row)))
+    return results
