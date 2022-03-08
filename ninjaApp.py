@@ -124,3 +124,15 @@ async def shared_routes(user_id : int):
     for row in cur.fetchall():
         results.append(dict(zip(columns,row)))
     return results
+
+@app.get("/route_history/")
+async def route_history(user_id : int):
+    query = ('SELECT * FROM History WHERE user_id = ' + str(user_id) + ';')
+
+    cur.execute(query)
+    columns = [column[0] for column in cur.description]
+    results = []
+    for row in cur.fetchall():
+        results.append(dict(zip(columns,row)))
+    return results
+
