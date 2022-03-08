@@ -113,3 +113,14 @@ async def route_info(user_id : int):
     for row in cur.fetchall():
         results.append(dict(zip(columns,row)))
     return results
+
+@app.get("/shared_routes/")
+async def shared_routes(user_id : int):
+    query = ('SELECT * FROM Routes r ' + 
+            'LEFT JOIN Shared s ON s.route_id = r.route_id WHERE s.user_id = ' + str(user_id) + ';')
+    cur.execute(query)
+    columns = [column[0] for column in cur.description]
+    results = []
+    for row in cur.fetchall():
+        results.append(dict(zip(columns,row)))
+    return results
