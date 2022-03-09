@@ -90,9 +90,9 @@ async def new_user(var_un: str, var_pw: str, var_lb: float, var_ft: int, var_in:
     return "success"
 
 @app.get("/user_stats/")
-async def user_stats(username: str):
+async def user_stats(user_id: int):
     cur.execute('SELECT * FROM User ' + 
-                'WHERE username = "' + username + '";')
+                'WHERE user_id = ' + str(user_id) + ';')
     results = list(cur)
     return results  
 
@@ -127,7 +127,7 @@ async def shared_routes(user_id : int):
 
 @app.get("/route_history/")
 async def route_history(user_id : int):
-    query = ('SELECT * FROM History WHERE user_id = ' + str(user_id) + ';')
+    query = ('SELECT h.route_id,h.datetime_of_run,h.calories,h.duration_of_run,h.distance_run, r.town FROM History h LEFT JOIN Routes r ON r.route_id = h.route_id WHERE h.user_id = ' + str(user_id) + ';')
 
     cur.execute(query)
     columns = [column[0] for column in cur.description]
