@@ -136,3 +136,101 @@ async def route_history(user_id : int):
         results.append(dict(zip(columns,row)))
     return results
 
+@app.get("/add_request/")
+async def add_request(user_id:int,toAdd_username:str, username:str):
+    cur.execute('SELECT user_id FROM User ' +
+            'WHERE username = "' + toAdd_username + '";')
+    result = list(cur)
+    Addto_id =[r[0] for r in result]
+    print(Addto_id[0])
+    query = ('INSERT INTO Request'+
+            '(user_id,username, toAdd_id, toAdd_username) Values ("'
+            +str(user_id) + '","'+username +'","'+ str(Addto_id[0])+ '","' +
+            toAdd_username + '");')
+    try:
+        cur.execute(query)
+        conn.commit()
+    except mariadb.Error as e:
+        print(f"Error: {e}")
+        return "fail"
+    return "success"
+
+@app.get("/check_friend/")
+async def check_friend(user_id:int, toAdd_username: str):
+    cur.execute('SELECT * FROM Friend ' +
+                'WHERE user_id = ' + str(user_id) + ' and friend_username = "'+ toAdd_username +'";')
+    results = list(cur)
+    if results:
+        return "Already Friends"
+    else:
+        return "Not Friends Yet"
+ 
+@app.get("/check_request/")
+async def check_request(user_id:int, toAdd_username: str):
+    cur.execute('SELECT * FROM Request ' +
+                'WHERE user_id = ' + str(user_id) + ' AND toAdd_username = "'+ toAdd_username +'";')
+    results = list(cur)
+    if results:
+        return "Request already made"
+    else:
+        return "No request made"
+  
+@app.get("/show_requestlist/")
+async def show_requestlist(user_id:int):
+    cur.execute('SELECT toAdd_username, toAdd_id FROM Request ' +
+                'WHERE user_id = "' + str(user_id)+ '";')
+    columns = [column[0] for column in cur.description]
+    results = []
+    for row in cur.fetchall():
+        results.append(dict(zip(columns,row)))
+    return results
+
+@app.get("/delete_request/")
+async def delete_request(user_id:int, toAdd_username: str):
+    query = ('DELETE FROM Request WHERE user_id = '
+            + str(user_id) + ' AND toAdd_username = "'+ toAdd_username +'";')
+    try:
+        cur.execute(query)
+        conn.commit()
+    except mariadb.Error as e:
+        print(f"Error: {e}")
+        return "fail"
+    return "success"
+
+
+@app.get("/show_friendlist/")
+async def show_friendlist(user_id: int):
+    cur.execute('SELECT friend_username, friend_id FROM Friend WHERE user_id = ' + str(user_id) + ';')
+    columns = [column[0] for column in cur.description]
+    results = []
+    for row in cur.fetchall():
+        results.append(dict(zip(columns,row)))
+    return results
+
+@app.get("/delete_friend/")  
+async def delete_friend(user_id:int, friend_username: str):
+    query = ('DELETE FROM Friend WHERE user_id = '
+            + str(user_id) + ' AND friend_username = "'+ friend_username +'";')
+    try:
+        cur.execute(query)
+        conn.commit()
+    except mariadb.Error as e:
+        print(f"Error: {e}")
+        return "fail"
+    return "success"
+
+@app.get("/add_friend/")
+async def add_friend(user_id:int,friend_id:int, friend_username:str, username:str):
+    query = ('INSERT INTO Friend'+
+            '(user_id, friend_id, friend_username, username) Values ("'
+            +str(user_id) + '","'+str(friend_id) +'","'+friend_username + '","' +
+            username + '");')
+    try:
+        cur.execute(query)
+        conn.commit()
+    except mariadb.Error as e:
+        print(f"Error: {e}")
+        return "fail"
+    return "success"
+
+
