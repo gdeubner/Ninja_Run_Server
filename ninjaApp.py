@@ -233,4 +233,28 @@ async def add_friend(user_id:int,friend_id:int, friend_username:str, username:st
         return "fail"
     return "success"
 
+@app.get("/share_route")
+async def share_route(user_id: int, shared_username: str, route_id: int):
+    query1 = ('SELECT * FROM User WHERE username = "' + shared_username + '";')
+    cur.execute(query1)
+    results = list(cur)
+    if len(results) == 0:
+        return "no user"
 
+    query2 = ('SELECT * FROM Shared WHERE route_id = ' + str(route_id) + ' AND shared_username = "' + shared_username + '";')
+    cur.execute(query2)
+    results = list(cur)
+    if len(results) != 0:
+        return "duplicate" 
+
+    query3 = ('INSERT INTO Shared (user_id,username,shared_id,shared_username,route_id) ' + 
+                'VALUES (' + str(user_id) + ',(SELECT u1.username FROM User u1 WHERE u1.user_id = ' + str(user_id) +
+                '), (SELECT u2.user_id FROM User u2 WHERE u2.username = "' + shared_username + '"),"' + shared_username + 
+                '",' + str(route_id) + ');')
+    try:
+        cur.execute(query3)
+        conn.commit()
+    except mariadb.Error as e:
+        print(f"Error: {e}")
+        return "fail"
+    return "success"
