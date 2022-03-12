@@ -103,6 +103,20 @@ async def user_login(username: str,password: str):
     results = list(cur)
     return results   
 
+@app.get("/update_userprofile/")
+async def update_userprofile(user_id:int, username:str, password:str, weight:float, height_ft:int, height_in:float):
+    query = ('UPDATE User SET username = "'+username+'", password = "'+password
+            +'", weight = "'+str(weight)+ '", height_ft = "'+str(height_ft)+'", height_in = "'
+            +str(height_in) + '" where user_id = "'+ str(user_id) +'";')
+    try:
+        cur.execute(query)
+        conn.commit()
+    except mariadb.Error as e:
+        print(f"Error: {e}")
+        return "fail"
+    return "success"
+
+
 @app.get("/route_info/")
 async def route_info(user_id : int):
     query = ('SELECT * FROM Routes ' + 
@@ -135,6 +149,24 @@ async def route_history(user_id : int):
     for row in cur.fetchall():
         results.append(dict(zip(columns,row)))
     return results
+
+@app.get("/add_history/")
+async def add_history(user_id:int, datetime_of_run:str, calories:int, duration_of_run:str, distance_run:float):
+    cur.execute('SELECT route_id FROM Routes ' +
+            'WHERE user_id = "' + str(user_id) + ' order by route_id DESC limit 1";')
+    result = list(cur)
+    route_id =[r[0] for r in result]
+    print(route_id[0])
+    query = ('INSERT INTO History'+
+            '(user_id,route_id, datetime_of_run, calories, duration_of_run, distance_run) Values ("'
+            +str(user_id) + '","'+str(route_id[0])+'","'+datetime_of_run +'","'+str(calories)+'","'+duration_of_run+'","'+ str(distance_run)+ '");')
+    try:
+        cur.execute(query)
+        conn.commit()
+    except mariadb.Error as e:
+        print(f"Error: {e}")
+        return "fail"
+    return "success"
 
 @app.get("/add_request/")
 async def add_request(user_id:int,toAdd_username:str, username:str):
