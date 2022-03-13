@@ -290,3 +290,47 @@ async def share_route(user_id: int, shared_username: str, route_id: int):
         print(f"Error: {e}")
         return "fail"
     return "success"
+
+async def add_follow(user_id:int,username:str,follow_username:str):
+    cur.execute('SELECT user_id FROM User ' +
+            'WHERE username = "' + follow_username + '";')
+    result = list(cur)
+    if not result:
+        return "No Username"
+    follow_id =[r[0] for r in result]
+    print(follow_id[0])
+    query = ('INSERT INTO Follow'+
+            '(user_id,username, follow_id, follow_username) Values ("'
+            +str(user_id) + '","'+username +'","'+ str(follow_id[0])+ '","' +
+            follow_username + '");')
+    try:
+        cur.execute(query)
+        conn.commit()
+    except mariadb.Error as e:
+        print(f"Error: {e}")
+        return "fail"
+    return "success"
+ 
+
+@app.get("/show_followlist/")
+async def show_friendlist(user_id: int):
+    cur.execute('SELECT follow_username, follow_id FROM Follow WHERE user_id = ' + str(user_id) + ';')
+    columns = [column[0] for column in cur.description]
+    results = []
+    for row in cur.fetchall():
+        results.append(dict(zip(columns,row)))
+    return results
+
+@app.get("/delete_follow/")
+async def delete_follow(user_id:int, follow_username: str):
+    query = ('DELETE FROM Follow WHERE user_id = '
+            + str(user_id) + ' AND follow_username = "'+ follow_username +'";')
+    try:
+        cur.execute(query)
+        conn.commit()
+    except mariadb.Error as e:
+        print(f"Error: {e}")
+        return "fail"
+    return "success"
+
+
