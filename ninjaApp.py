@@ -291,6 +291,7 @@ async def share_route(user_id: int, shared_username: str, route_id: int):
         return "fail"
     return "success"
 
+@app.get("/add_follow/")
 async def add_follow(user_id:int,username:str,follow_username:str):
     cur.execute('SELECT user_id FROM User ' +
             'WHERE username = "' + follow_username + '";')
@@ -312,14 +313,24 @@ async def add_follow(user_id:int,username:str,follow_username:str):
     return "success"
  
 
-@app.get("/show_followlist/")
-async def show_friendlist(user_id: int):
+@app.get("/show_followinglist/")
+async def show_followinglist(user_id: int):
     cur.execute('SELECT follow_username, follow_id FROM Follow WHERE user_id = ' + str(user_id) + ';')
     columns = [column[0] for column in cur.description]
     results = []
     for row in cur.fetchall():
         results.append(dict(zip(columns,row)))
     return results
+
+@app.get("/show_followerlist/")
+async def show_followerlist(user_id: int):
+    cur.execute('SELECT username, user_id FROM Follow WHERE follow_id = ' + str(user_id) + ';')
+    columns = [column[0] for column in cur.description]
+    results = []
+    for row in cur.fetchall():
+        results.append(dict(zip(columns,row)))
+    return results
+
 
 @app.get("/delete_follow/")
 async def delete_follow(user_id:int, follow_username: str):
