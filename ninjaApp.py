@@ -89,6 +89,20 @@ async def new_user(var_un: str, var_pw: str, var_lb: float, var_ft: int, var_in:
         return "fail"
     return "success"
 
+@app.get("/register_user/")
+async def register_user(var_un: str, var_pw: str, var_lb: float, var_ft: int, var_in: float, var_nam: str):
+    query = ('INSERT INTO User ' +
+                '(username,password,weight,height_ft,height_in,points,total_calories,total_distance,Name,IsAdmin)' +
+                ' VALUES ("' + var_un + '","' + var_pw + '",' + str(var_lb) + ',' + str(var_ft) + ',' + str(var_in) + ',' + str(0) + ',' + str(0) + ',' + str(0) + ',"' + var_nam + '",' + str(0) + ');')
+
+    try:
+        cur.execute(query)
+        conn.commit()
+    except mariadb.Error as e:
+        print(f"Error: {e}")
+        return "fail"
+    return "success"
+
 @app.get("/user_stats/")
 async def user_stats(user_id: int):
     cur.execute('SELECT * FROM User ' + 
@@ -101,13 +115,13 @@ async def user_login(username: str,password: str):
     cur.execute('SELECT user_id FROM User ' + 
                 'WHERE username = "' + username + '" AND password = "'+ password +'";')
     results = list(cur)
-    return results   
-
-@app.get("/update_userprofile/")
-async def update_userprofile(user_id:int, username:str, password:str, weight:float, height_ft:int, height_in:float):
-    query = ('UPDATE User SET username = "'+username+'", password = "'+password
-            +'", weight = "'+str(weight)+ '", height_ft = "'+str(height_ft)+'", height_in = "'
-            +str(height_in) + '" where user_id = "'+ str(user_id) +'";')
+    return results 
+  
+@app.get("/register_user/")
+async def register_user(var_un: str, var_pw: str, var_lb: float, var_ft: int, var_in: float, var_nam: str):
+    query = ('INSERT INTO User ' +
+                '(username,password,weight,height_ft,height_in,points,total_calories,total_distance,Name,IsAdmin)' +
+                ' VALUES ("' + var_un + '","' + var_pw + '",' + str(var_lb) + ',' + str(var_ft) + ',' + str(var_in) + ',0,0,0,"' + var_nam + '",0);')
     try:
         cur.execute(query)
         conn.commit()
@@ -115,6 +129,21 @@ async def update_userprofile(user_id:int, username:str, password:str, weight:flo
         print(f"Error: {e}")
         return "fail"
     return "success"
+
+
+@app.get("/update_userprofile/")
+async def update_userprofile(user_id:int, username:str, password:str, weight:float, height_ft:int, height_in:float, name:str):
+    query = ('UPDATE User SET username = "'+username+'", password = "'+password
+            +'", weight = "'+str(weight)+ '", height_ft = "'+str(height_ft)+'", height_in = "'
+            +str(height_in) +'", Name="'+name+ '" where user_id = "'+ str(user_id) +'";')
+    try:
+        cur.execute(query)
+        conn.commit()
+    except mariadb.Error as e:
+        print(f"Error: {e}")
+        return "fail"
+    return "success"
+
 
 
 @app.get("/route_info/")
