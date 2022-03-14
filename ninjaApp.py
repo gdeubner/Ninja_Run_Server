@@ -184,15 +184,10 @@ async def route_history(user_id : int):
     return results
 
 @app.get("/add_history/")
-async def add_history(user_id:int, datetime_of_run:str, calories:int, duration_of_run:str, distance_run:float):
-    cur.execute('SELECT route_id FROM Routes ' +
-            'WHERE user_id = "' + str(user_id) + ' order by route_id DESC limit 1";')
-    result = list(cur)
-    route_id =[r[0] for r in result]
-    print(route_id[0])
+async def add_history(user_id:int, datetime_of_run:str, calories:int, duration_of_run:str, distance_run:float,route_id:int):
     query = ('INSERT INTO History'+
-            '(user_id,route_id, datetime_of_run, calories, duration_of_run, distance_run) Values ("'
-            +str(user_id) + '","'+str(route_id[0])+'","'+datetime_of_run +'","'+str(calories)+'","'+duration_of_run+'","'+ str(distance_run)+ '");')
+            '(user_id,route_id, datetime_of_run, calories, duration_of_run, distance_run) Values ('
+             + str(user_id) + ','+str(route_id)+',"'+datetime_of_run +'",'+str(calories)+',"'+duration_of_run+'",'+ str(distance_run)+ ');')
     try:
         cur.execute(query)
         conn.commit()
