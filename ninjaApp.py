@@ -52,8 +52,12 @@ async def send_route(var_lat_start: float, var_long_start: float, var_lat_end: f
         conn.commit()
     except mariadb.Error as e:
         print(f"Error: {e}")
-        return "fail"
-    return "success"
+        return "-1"
+
+    query2 = ('SELECT MAX(route_id) FROM Routes;')
+    cur.execute(query2)
+    results = list(cur)
+    return results
 
 @app.get("/user_info/")
 async def user_info(username: str):
