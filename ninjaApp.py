@@ -93,6 +93,20 @@ async def new_user(var_un: str, var_pw: str, var_lb: float, var_ft: int, var_in:
         return "fail"
     return "success"
 
+@app.get("/register_user/")
+async def register_user(var_un: str, var_pw: str, var_lb: float, var_ft: int, var_in: float, var_nam: str):
+    query = ('INSERT INTO User ' +
+                '(username,password,weight,height_ft,height_in,points,total_calories,total_distance,Name,IsAdmin)' +
+                ' VALUES ("' + var_un + '","' + var_pw + '",' + str(var_lb) + ',' + str(var_ft) + ',' + str(var_in) + ',' + str(0) + ',' + str(0) + ',' + str(0) + ',"' + var_nam + '",' + str(0) + ');')
+
+    try:
+        cur.execute(query)
+        conn.commit()
+    except mariadb.Error as e:
+        print(f"Error: {e}")
+        return "fail"
+    return "success"
+
 @app.get("/user_stats/")
 async def user_stats(user_id: int):
     cur.execute('SELECT * FROM User ' + 
@@ -105,7 +119,36 @@ async def user_login(username: str,password: str):
     cur.execute('SELECT user_id FROM User ' + 
                 'WHERE username = "' + username + '" AND password = "'+ password +'";')
     results = list(cur)
-    return results   
+    return results 
+  
+@app.get("/register_user/")
+async def register_user(var_un: str, var_pw: str, var_lb: float, var_ft: int, var_in: float, var_nam: str):
+    query = ('INSERT INTO User ' +
+                '(username,password,weight,height_ft,height_in,points,total_calories,total_distance,Name,IsAdmin)' +
+                ' VALUES ("' + var_un + '","' + var_pw + '",' + str(var_lb) + ',' + str(var_ft) + ',' + str(var_in) + ',0,0,0,"' + var_nam + '",0);')
+    try:
+        cur.execute(query)
+        conn.commit()
+    except mariadb.Error as e:
+        print(f"Error: {e}")
+        return "fail"
+    return "success"
+
+
+@app.get("/update_userprofile/")
+async def update_userprofile(user_id:int, username:str, password:str, weight:float, height_ft:int, height_in:float, name:str):
+    query = ('UPDATE User SET username = "'+username+'", password = "'+password
+            +'", weight = "'+str(weight)+ '", height_ft = "'+str(height_ft)+'", height_in = "'
+            +str(height_in) +'", Name="'+name+ '" where user_id = "'+ str(user_id) +'";')
+    try:
+        cur.execute(query)
+        conn.commit()
+    except mariadb.Error as e:
+        print(f"Error: {e}")
+        return "fail"
+    return "success"
+
+
 
 @app.get("/route_info/")
 async def route_info(user_id : int):
@@ -139,6 +182,24 @@ async def route_history(user_id : int):
     for row in cur.fetchall():
         results.append(dict(zip(columns,row)))
     return results
+
+@app.get("/add_history/")
+async def add_history(user_id:int, datetime_of_run:str, calories:int, duration_of_run:str, distance_run:float):
+    cur.execute('SELECT route_id FROM Routes ' +
+            'WHERE user_id = "' + str(user_id) + ' order by route_id DESC limit 1";')
+    result = list(cur)
+    route_id =[r[0] for r in result]
+    print(route_id[0])
+    query = ('INSERT INTO History'+
+            '(user_id,route_id, datetime_of_run, calories, duration_of_run, distance_run) Values ("'
+            +str(user_id) + '","'+str(route_id[0])+'","'+datetime_of_run +'","'+str(calories)+'","'+duration_of_run+'","'+ str(distance_run)+ '");')
+    try:
+        cur.execute(query)
+        conn.commit()
+    except mariadb.Error as e:
+        print(f"Error: {e}")
+        return "fail"
+    return "success"
 
 @app.get("/add_request/")
 async def add_request(user_id:int,toAdd_username:str, username:str):
@@ -262,3 +323,58 @@ async def share_route(user_id: int, shared_username: str, route_id: int):
         print(f"Error: {e}")
         return "fail"
     return "success"
+
+@app.get("/add_follow/")
+async def add_follow(user_id:int,username:str,follow_username:str):
+    cur.execute('SELECT user_id FROM User ' +
+            'WHERE username = "' + follow_username + '";')
+    result = list(cur)
+    if not result:
+        return "No Username"
+    follow_id =[r[0] for r in result]
+    print(follow_id[0])
+    query = ('INSERT INTO Follow'+
+            '(user_id,username, follow_id, follow_username) Values ("'
+            +str(user_id) + '","'+username +'","'+ str(follow_id[0])+ '","' +
+            follow_username + '");')
+    try:
+        cur.execute(query)
+        conn.commit()
+    except mariadb.Error as e:
+        print(f"Error: {e}")
+        return "fail"
+    return "success"
+ 
+
+@app.get("/show_followinglist/")
+async def show_followinglist(user_id: int):
+    cur.execute('SELECT follow_username, follow_id FROM Follow WHERE user_id = ' + str(user_id) + ';')
+    columns = [column[0] for column in cur.description]
+    results = []
+    for row in cur.fetchall():
+        results.append(dict(zip(columns,row)))
+    return results
+
+@app.get("/show_followerlist/")
+async def show_followerlist(user_id: int):
+    cur.execute('SELECT username, user_id FROM Follow WHERE follow_id = ' + str(user_id) + ';')
+    columns = [column[0] for column in cur.description]
+    results = []
+    for row in cur.fetchall():
+        results.append(dict(zip(columns,row)))
+    return results
+
+
+@app.get("/delete_follow/")
+async def delete_follow(user_id:int, follow_username: str):
+    query = ('DELETE FROM Follow WHERE user_id = '
+            + str(user_id) + ' AND follow_username = "'+ follow_username +'";')
+    try:
+        cur.execute(query)
+        conn.commit()
+    except mariadb.Error as e:
+        print(f"Error: {e}")
+        return "fail"
+    return "success"
+
+
