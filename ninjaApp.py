@@ -174,7 +174,7 @@ async def shared_routes(user_id : int):
 
 @app.get("/route_history/")
 async def route_history(user_id : int):
-    query = ('SELECT h.route_id,h.datetime,h.calories,h.duration,h.distance, r.town FROM History h LEFT JOIN Routes r ON r.route_id = h.route_id WHERE h.user_id = ' + str(user_id) + ';')
+    query = ('SELECT h.route_id,h.datetime,h.calories,h.duration,h.distance,r.town FROM History h LEFT JOIN Routes r ON r.route_id = h.route_id WHERE h.user_id = ' + str(user_id) + ';')
 
     cur.execute(query)
     columns = [column[0] for column in cur.description]
