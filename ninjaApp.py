@@ -183,11 +183,13 @@ async def route_history(user_id : int):
         results.append(dict(zip(columns,row)))
     return results
 
+
+
 @app.get("/add_history/")
-async def add_history(user_id:int, datetime_of_run:str, calories:int, duration_of_run:str, distance_run:float,route_id:int):
+async def add_history(user_id:int, datetime:str, calories:int, duration:int, distance:float,route_id:int):
     query = ('INSERT INTO History'+
             '(user_id,route_id, datetime, calories, duration, distance) Values ('
-             + str(user_id) + ','+str(route_id)+',"'+datetime_of_run +'",'+str(calories)+',"'+duration_of_run+'",'+ str(distance_run)+ ');')
+             + str(user_id) + ','+str(route_id)+',"'+datetime +'",'+str(calories)+',"'+str(duration) +'",'+ str(distance)+ ');')
     try:
         cur.execute(query)
         conn.commit()
@@ -373,3 +375,23 @@ async def delete_follow(user_id:int, follow_username: str):
     return "success"
 
 
+@app.get("/get_route/")
+async def get_route(route_id:int):
+    query = f'SELECT * from Routes where route_id = {route_id};'
+    cur.execute(query)
+    columns = [column[0] for column in cur.description]
+    results = {}
+    for row in cur.fetchall():
+        results.update(dict(zip(columns,row)))
+
+    query = f'select u.user_id, u.username from User u, (select user_id from Routes where route_id = {route_id}) r where u.user_id = r.user_id;'
+    cur.execute(query)
+    columns = [column[0] for column in cur.description]
+    results2 = {}
+    for row in cur.fetchall():
+        results2.update(dict(zip(columns,row)))
+    
+    res = {"user":results2,"route":results}
+    return res
+
+    
