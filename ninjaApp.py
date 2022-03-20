@@ -174,7 +174,7 @@ async def shared_routes(user_id : int):
 
 @app.get("/route_history/")
 async def route_history(user_id : int):
-    query = ('SELECT h.route_id,h.datetime_of_run,h.calories,h.duration_of_run,h.distance_run, r.town FROM History h LEFT JOIN Routes r ON r.route_id = h.route_id WHERE h.user_id = ' + str(user_id) + ';')
+    query = ('SELECT h.route_id,h.datetime,h.calories,h.duration,h.distance,r.town FROM History h LEFT JOIN Routes r ON r.route_id = h.route_id WHERE h.user_id = ' + str(user_id) + ';')
 
     cur.execute(query)
     columns = [column[0] for column in cur.description]
@@ -186,7 +186,7 @@ async def route_history(user_id : int):
 @app.get("/add_history/")
 async def add_history(user_id:int, datetime_of_run:str, calories:int, duration_of_run:str, distance_run:float,route_id:int):
     query = ('INSERT INTO History'+
-            '(user_id,route_id, datetime_of_run, calories, duration_of_run, distance_run) Values ('
+            '(user_id,route_id, datetime, calories, duration, distance) Values ('
              + str(user_id) + ','+str(route_id)+',"'+datetime_of_run +'",'+str(calories)+',"'+duration_of_run+'",'+ str(distance_run)+ ');')
     try:
         cur.execute(query)
