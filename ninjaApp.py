@@ -164,7 +164,7 @@ async def route_info(user_id : int):
 @app.get("/shared_routes/")
 async def shared_routes(user_id : int):
     query = ('SELECT r.route_id,r.town,r.distance,s.shared_username FROM Routes r ' + 
-            'LEFT JOIN Shared s ON s.route_id = r.route_id WHERE s.user_id = ' + str(user_id) + ';')
+            'LEFT JOIN Shared s ON s.route_id = r.route_id WHERE s.shared_id = ' + str(user_id) + ';')
     cur.execute(query)
     columns = [column[0] for column in cur.description]
     results = []
