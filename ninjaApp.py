@@ -111,8 +111,11 @@ async def register_user(var_un: str, var_pw: str, var_lb: float, var_ft: int, va
 async def user_stats(user_id: int):
     cur.execute('SELECT * FROM User ' + 
                 'WHERE user_id = ' + str(user_id) + ';')
-    results = list(cur)
-    return results  
+    columns = [column[0] for column in cur.description]
+    results = {}
+    for row in cur.fetchall():
+        results.update(dict(zip(columns,row)))
+    return results
 
 @app.get("/user_login/")
 async def user_login(username: str,password: str):
