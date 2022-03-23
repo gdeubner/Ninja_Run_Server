@@ -163,7 +163,7 @@ async def route_info(user_id : int):
 
 @app.get("/shared_routes/")
 async def shared_routes(user_id : int):
-    query = ('SELECT r.route_id,r.town,r.distance,s.shared_username FROM Routes r ' + 
+    query = ('SELECT r.route_id,r.town,r.distance,s.username FROM Routes r ' + 
             'LEFT JOIN Shared s ON s.route_id = r.route_id WHERE s.shared_id = ' + str(user_id) + ';')
     cur.execute(query)
     columns = [column[0] for column in cur.description]
@@ -394,4 +394,10 @@ async def get_route(route_id:int):
     res = {"user":results2,"route":results}
     return res
 
-    
+@app.get("/delete_shared/")
+async def delete_shared(route_id:int,user_id: int):
+    query = f'DELETE FROM Shared WHERE route_id = {route_id} AND shared_id = {user_id};'
+    cur.execute(query)
+    conn.commit()
+
+    return "success"
