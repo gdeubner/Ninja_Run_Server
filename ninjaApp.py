@@ -257,9 +257,9 @@ async def show_followerlist(user_id: int):
 
 
 @app.get("/delete_follow/")
-async def delete_follow(user_id:int, follow_username: str):
+async def delete_follow(user_id:int, follow_id: int):
     query = ('DELETE FROM Follow WHERE user_id = '
-            + str(user_id) + ' AND follow_username = "'+ follow_username +'";')
+            + str(user_id) + ' AND follow_id = "'+ str(follow_id) +'";')
     try:
         cur.execute(query)
         conn.commit()
