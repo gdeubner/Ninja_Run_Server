@@ -298,7 +298,7 @@ async def delete_shared(route_id:int,user_id: int):
 
 
 @app.get("/update_points/")
-async def delete_shared(points:int,user_id: int):
+async def update_points(points:int,user_id: int):
     query = f'UDPATE User SET points = points + {val} WHERE user_id = {user_id};'
     cur.execute(query)
     conn.commit()
