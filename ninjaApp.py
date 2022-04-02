@@ -268,6 +268,15 @@ async def delete_follow(user_id:int, follow_id: int):
         return "fail"
     return "success"
 
+@app.get("/user_routes/")
+async def user_routes(user_id: int):
+    cur.execute('SELECT route_id, town, distance  FROM Routes WHERE user_id = ' + str(user_id) + ';')
+    columns = [column[0] for column in cur.description]
+    results = []
+    for row in cur.fetchall():
+        results.append(dict(zip(columns,row)))
+    return results
+
 
 @app.get("/get_route/")
 async def get_route(route_id:int):
