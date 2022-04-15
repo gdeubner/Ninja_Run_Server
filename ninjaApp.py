@@ -316,6 +316,13 @@ async def delete_shared(route_id:int,user_id: int):
 
     return "success"
 
+@app.get("/delete_route/")
+async def delete_route(route_id:int):
+    query = f'DELETE FROM Routes WHERE route_id = {route_id};'
+    cur.execute(query)
+    conn.commit()
+
+    return "success"
 
 @app.get("/update_points/")
 async def update_points(points:int,user_id: int, dist: float,cals: int):
