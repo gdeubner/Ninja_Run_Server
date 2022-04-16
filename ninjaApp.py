@@ -1,3 +1,4 @@
+from os import strerror
 from fastapi import FastAPI, Request, Body
 import mariadb
 import sys
@@ -313,3 +314,23 @@ async def update_points(points:int,user_id: int, dist: float,cals: int):
     conn.commit()
 
     return "success"
+
+
+@app.get("/search_routes/")
+async def search_routes(search_by:str, search_param):
+    if (search_by == "route_id"):
+        query = f'select Routes.*, User.username from Routes left join User on Routes.user_id = User.user_id where Routes.route_id = {search_param};'
+    elif (search_by == "username"):
+        query = f'select Routes.*, User.username from Routes left join User on Routes.user_id = User.user_id where User.username = "{search_param}";'
+    elif (search_by == "town"):
+        query = f'select Routes.*, User.username from Routes left join User on Routes.user_id = User.user_id where Routes.town = "{search_param}";'
+    else:
+        return "error"
+
+    cur.execute(query)
+    columns = [column[0] for column in cur.description]
+    results = []
+    for row in cur.fetchall():
+        results.append(dict(zip(columns,row)))
+    
+    return results
