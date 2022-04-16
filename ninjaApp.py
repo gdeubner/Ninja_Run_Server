@@ -1,5 +1,6 @@
 from os import strerror
 from fastapi import FastAPI, Request, Body
+from fastapi.middleware.cors import CORSMiddleware
 import mariadb
 import sys
 import json
@@ -18,6 +19,16 @@ app = FastAPI(
     description='Super cool API used by Ninjaneers',
     version="1.0.0"
         )
+
+origins = ["*"]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 @app.get("/test/")
 async def test():
@@ -306,6 +317,13 @@ async def delete_shared(route_id:int,user_id: int):
 
     return "success"
 
+@app.get("/delete_route/")
+async def delete_route(route_id:int):
+    query = f'UPDATE Routes set user_id=-1 WHERE route_id = {route_id};'
+    cur.execute(query)
+    conn.commit()
+
+    return "success"
 
 @app.get("/update_points/")
 async def update_points(points:int,user_id: int, dist: float,cals: int):
@@ -332,5 +350,18 @@ async def search_routes(search_by:str, search_param):
     results = []
     for row in cur.fetchall():
         results.append(dict(zip(columns,row)))
-    
+
+    return results
+
+
+@app.get("/admin_user/")
+async def admin_user():
+    query = 'SELECT * FROM User;'
+    cur.execute(query)
+
+    columns = [column[0] for column in cur.description]
+    results = []
+    for row in cur.fetchall():
+        results.append(dict(zip(columns,row)))
+
     return results
