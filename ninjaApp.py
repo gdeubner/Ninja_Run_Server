@@ -54,11 +54,13 @@ async def update_user(var_uid: int, var_dist: float,var_cal: int):
     return "success"
 
 @app.post("/send_route")
-async def send_route(var_lat_start: float, var_long_start: float, var_lat_end: float, var_long_end: float, var_town: str, var_dist: float, var_uid: int, var_title: str, var_routf: str = Body(...)):
+async def send_route(var_lat_start: float, var_long_start: float, var_lat_end: float, var_long_end: float, var_town: str, var_dist: float, var_uid: int, var_title: str, var_date: str, var_routf: str = Body(...)):
     query = ('INSERT INTO Routes' +
-                ' (town,distance,user_id,lat_start,long_start,lat_end,long_end,route_f,title)' +
+                ' (town,distance,user_id,lat_start,long_start,lat_end,long_end,route_f,title,date)' +
                 ' VALUES' + 
-                ' ("' + var_town + '",' + str(var_dist) +  ',' + str(var_uid) + ',' + str(var_lat_start) + ',' + str(var_long_start) + ',' + str(var_lat_end) + ',' + str(var_long_end) + ',"' + var_routf + '","' + var_title + '");')
+                ' ("' + var_town + '",' + str(var_dist) +  ',' + str(var_uid) + ',' + str(var_lat_start)
+             + ',' + str(var_long_start) + ',' + str(var_lat_end) + ',' + str(var_long_end) + ',"'
+             + var_routf + '","' + var_title + '","' + var_date + '");')
     cur.execute(query)
     try:
         conn.commit()
