@@ -360,10 +360,77 @@ async def search_routes(search_by:str, search_param):
 async def admin_user():
     query = 'SELECT * FROM User;'
     cur.execute(query)
-
     columns = [column[0] for column in cur.description]
     results = []
     for row in cur.fetchall():
         results.append(dict(zip(columns,row)))
-
     return results
+  
+@app.get("/deactivate/")
+async def deactivate(username:str,password:str):
+    cur.execute('SELECT active FROM User WHERE username = "' + username +'" and password = "'+password +'";')
+    result = list(cur)
+    if not result:
+        return "Username and Password do not match"
+    active_status = [r[0] for r in result]
+    print(active_status)
+    if active_status == "0":
+        return "Account is already deactive"
+    user_id =[r[0] for r in result]
+    print(user_id[0])
+    query = ('DELETE FROM  Follow where username ="'+ username+'" or follow_username ="' +username + '";')
+    try:
+        cur.execute(query)
+        conn.commit()
+    except mariadb.Error as e:
+        print(f"Error: {e}")
+        return "fail"
+    query = ('Update User set active = 0 where username = "'+username+ '";')
+    try:
+        cur.execute(query)
+        conn.commit()
+    except mariadb.Error as e:
+        print(f"Error: {e}")
+        return "fail"
+    return "success"
+
+@app.get("/show_follower_table/")
+async def show_follower_table():
+        query = f'Select * from Follow;'
+        cur.execute(query)
+        columns = [column[0] for column in cur.description]
+        results = []
+        for row in cur.fetchall():
+            results.append(dict(zip(columns, row)))
+        return results
+
+@app.get("/show_route_table/")
+async def show_follower_table():
+        query = f'Select route_id, town, distance from Routes;'
+        cur.execute(query)
+        columns = [column[0] for column in cur.description]
+        results = []
+        for row in cur.fetchall():
+            results.append(dict(zip(columns, row)))
+        return results
+
+  
+@app.get("/activate/")
+async def activate(username:str,password:str):
+    cur.execute('SELECT active FROM User WHERE username = "' + username +'" and password = "'+password +'" ;')
+    result = list(cur)
+    if not result:
+        return "Username and Password do not match"
+    active_status = [r[0] for r in result]
+    print(active_status)
+    if active_status == True:
+        return "Account is already Active"
+    query = ('Update User set active = 1 where username = "'+username+ '";')
+    try:
+        cur.execute(query)
+        conn.commit()
+    except mariadb.Error as e:
+        print(f"Error: {e}")
+        return "fail"
+    return "success"
+
