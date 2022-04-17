@@ -54,11 +54,11 @@ async def update_user(var_uid: int, var_dist: float,var_cal: int):
     return "success"
 
 @app.post("/send_route")
-async def send_route(var_lat_start: float, var_long_start: float, var_lat_end: float, var_long_end: float, var_town: str, var_dist: float, var_uid: int, var_routf: str = Body(...)):
+async def send_route(var_lat_start: float, var_long_start: float, var_lat_end: float, var_long_end: float, var_town: str, var_dist: float, var_uid: int, var_title: str, var_routf: str = Body(...)):
     query = ('INSERT INTO Routes' +
-                ' (town,distance,user_id,lat_start,long_start,lat_end,long_end,route_f)' +
+                ' (town,distance,user_id,lat_start,long_start,lat_end,long_end,route_f,title)' +
                 ' VALUES' + 
-                ' ("' + var_town + '",' + str(var_dist) +  ',' + str(var_uid) + ',' + str(var_lat_start) + ',' + str(var_long_start) + ',' + str(var_lat_end) + ',' + str(var_long_end) + ',"' + var_routf +  '");')
+                ' ("' + var_town + '",' + str(var_dist) +  ',' + str(var_uid) + ',' + str(var_lat_start) + ',' + str(var_long_start) + ',' + str(var_lat_end) + ',' + str(var_long_end) + ',"' + var_routf + '","' + var_title + '");')
     cur.execute(query)
     try:
         conn.commit()
@@ -342,6 +342,8 @@ async def search_routes(search_by:str, search_param):
         query = f'select Routes.*, User.username from Routes left join User on Routes.user_id = User.user_id where User.username = "{search_param}";'
     elif (search_by == "town"):
         query = f'select Routes.*, User.username from Routes left join User on Routes.user_id = User.user_id where Routes.town = "{search_param}";'
+    elif (search_by == "title"):
+        query = f'select Routes.*, User.username from Routes left join User on Routes.user_id = User.user_id where Routes.title = "{search_param}";'
     else:
         return "error"
 
