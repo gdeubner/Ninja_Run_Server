@@ -169,7 +169,7 @@ async def route_info(user_id : int):
 
 @app.get("/shared_routes/")
 async def shared_routes(user_id : int):
-    query = ('SELECT r.route_id,r.town,r.distance,s.username FROM Routes r ' + 
+    query = ('SELECT r.route_id,r.title,r.town,r.distance,s.username FROM Routes r ' + 
             'LEFT JOIN Shared s ON s.route_id = r.route_id WHERE s.shared_id = ' + str(user_id) + ';')
     cur.execute(query)
     columns = [column[0] for column in cur.description]
@@ -180,7 +180,7 @@ async def shared_routes(user_id : int):
 
 @app.get("/route_history/")
 async def route_history(user_id : int):
-    query = ('SELECT h.route_id,h.datetime,h.calories,h.duration,h.distance,r.town FROM History h LEFT JOIN Routes r ON r.route_id = h.route_id WHERE h.user_id = ' + str(user_id) + ';')
+    query = ('SELECT h.route_id,h.datetime,h.calories,h.duration,h.distance,r.town,r.title FROM History h LEFT JOIN Routes r ON r.route_id = h.route_id WHERE h.user_id = ' + str(user_id) + ';')
 
     cur.execute(query)
     columns = [column[0] for column in cur.description]
