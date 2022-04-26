@@ -461,7 +461,7 @@ async def show_route_table3():
 
 @app.get("/top10_point/")
 async def top10_point():
-    query = 'Select username, point From User order by points desc limit 10;'
+    query = 'Select username, points From User order by points desc limit 10;'
     cur.execute(query)
     columns = [column[0] for column in cur.description]
     results = []
