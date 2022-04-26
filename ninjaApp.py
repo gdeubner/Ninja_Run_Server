@@ -54,11 +54,13 @@ async def update_user(var_uid: int, var_dist: float,var_cal: int):
     return "success"
 
 @app.post("/send_route")
-async def send_route(var_lat_start: float, var_long_start: float, var_lat_end: float, var_long_end: float, var_town: str, var_dist: float, var_uid: int, var_routf: str = Body(...)):
+async def send_route(var_lat_start: float, var_long_start: float, var_lat_end: float, var_long_end: float, var_town: str, var_dist: float, var_uid: int, var_title: str, var_date: str, var_routf: str = Body(...)):
     query = ('INSERT INTO Routes' +
-                ' (town,distance,user_id,lat_start,long_start,lat_end,long_end,route_f)' +
+                ' (town,distance,user_id,lat_start,long_start,lat_end,long_end,route_f,title,date)' +
                 ' VALUES' + 
-                ' ("' + var_town + '",' + str(var_dist) +  ',' + str(var_uid) + ',' + str(var_lat_start) + ',' + str(var_long_start) + ',' + str(var_lat_end) + ',' + str(var_long_end) + ',"' + var_routf +  '");')
+                ' ("' + var_town + '",' + str(var_dist) +  ',' + str(var_uid) + ',' + str(var_lat_start)
+             + ',' + str(var_long_start) + ',' + str(var_lat_end) + ',' + str(var_long_end) + ',"'
+             + var_routf + '","' + var_title + '","' + var_date + '");')
     cur.execute(query)
     try:
         conn.commit()
@@ -167,7 +169,7 @@ async def route_info(user_id : int):
 
 @app.get("/shared_routes/")
 async def shared_routes(user_id : int):
-    query = ('SELECT r.route_id,r.town,r.distance,s.username FROM Routes r ' + 
+    query = ('SELECT r.route_id,r.title,r.town,r.distance,s.username FROM Routes r ' + 
             'LEFT JOIN Shared s ON s.route_id = r.route_id WHERE s.shared_id = ' + str(user_id) + ';')
     cur.execute(query)
     columns = [column[0] for column in cur.description]
@@ -178,7 +180,7 @@ async def shared_routes(user_id : int):
 
 @app.get("/route_history/")
 async def route_history(user_id : int):
-    query = ('SELECT h.route_id,h.datetime,h.calories,h.duration,h.distance,r.town FROM History h LEFT JOIN Routes r ON r.route_id = h.route_id WHERE h.user_id = ' + str(user_id) + ';')
+    query = ('SELECT h.route_id,h.datetime,h.calories,h.duration,h.distance,r.town,r.title FROM History h LEFT JOIN Routes r ON r.route_id = h.route_id WHERE h.user_id = ' + str(user_id) + ';')
 
     cur.execute(query)
     columns = [column[0] for column in cur.description]
@@ -342,6 +344,8 @@ async def search_routes(search_by:str, search_param):
         query = f'select Routes.*, User.username from Routes left join User on Routes.user_id = User.user_id where User.username = "{search_param}";'
     elif (search_by == "town"):
         query = f'select Routes.*, User.username from Routes left join User on Routes.user_id = User.user_id where Routes.town = "{search_param}";'
+    elif (search_by == "title"):
+        query = f'select Routes.*, User.username from Routes left join User on Routes.user_id = User.user_id where Routes.title = "{search_param}";'
     else:
         return "error"
 
@@ -358,10 +362,99 @@ async def search_routes(search_by:str, search_param):
 async def admin_user():
     query = 'SELECT * FROM User;'
     cur.execute(query)
-
     columns = [column[0] for column in cur.description]
     results = []
     for row in cur.fetchall():
         results.append(dict(zip(columns,row)))
-
     return results
+  
+@app.get("/deactivate/")
+async def deactivate(username:str,password:str):
+    cur.execute('SELECT active FROM User WHERE username = "' + username +'" and password = "'+password +'";')
+    result = list(cur)
+    if not result:
+        return "Username and Password do not match"
+    active_status = [r[0] for r in result]
+    print(active_status)
+    if active_status == "0":
+        return "Account is already deactive"
+    user_id =[r[0] for r in result]
+    print(user_id[0])
+    query = ('DELETE FROM  Follow where username ="'+ username+'" or follow_username ="' +username + '";')
+    try:
+        cur.execute(query)
+        conn.commit()
+    except mariadb.Error as e:
+        print(f"Error: {e}")
+        return "fail"
+    query = ('Update User set active = 0 where username = "'+username+ '";')
+    try:
+        cur.execute(query)
+        conn.commit()
+    except mariadb.Error as e:
+        print(f"Error: {e}")
+        return "fail"
+    return "success"
+
+@app.get("/show_follower_table/")
+async def show_follower_table():
+        query = f'Select * from Follow;'
+        cur.execute(query)
+        columns = [column[0] for column in cur.description]
+        results = []
+        for row in cur.fetchall():
+            results.append(dict(zip(columns, row)))
+        return results
+
+@app.get("/show_route_table/")
+async def show_follower_table():
+        query = f'Select route_id, town, distance from Routes;'
+        cur.execute(query)
+        columns = [column[0] for column in cur.description]
+        results = []
+        for row in cur.fetchall():
+            results.append(dict(zip(columns, row)))
+        return results
+
+  
+@app.get("/activate/")
+async def activate(username:str,password:str):
+    cur.execute('SELECT active FROM User WHERE username = "' + username +'" and password = "'+password +'" ;')
+    result = list(cur)
+    if not result:
+        return "Username and Password do not match"
+    active_status = [r[0] for r in result]
+    print(active_status)
+    if active_status == True:
+        return "Account is already Active"
+    query = ('Update User set active = 1 where username = "'+username+ '";')
+    try:
+        cur.execute(query)
+        conn.commit()
+    except mariadb.Error as e:
+        print(f"Error: {e}")
+        return "fail"
+    return "success"
+
+
+@app.get("/show_route_table2/")
+async def show_route_table2():
+        query = f'Select town as name, ROUND(COUNT(distance),2) as value from Routes GROUP BY town ORDER BY COUNT(distance) DESC;'
+        cur.execute(query)
+        columns = [column[0] for column in cur.description]
+        results = []
+        for row in cur.fetchall():
+            results.append(dict(zip(columns, row)))
+        return results
+
+
+
+@app.get("/show_route_table3/")
+async def show_route_table3():
+        query = f'Select town as name, ROUND(SUM(distance),2) as value from Routes GROUP BY town ORDER BY SUM(distance) DESC;'
+        cur.execute(query)
+        columns = [column[0] for column in cur.description]
+        results = []
+        for row in cur.fetchall():
+            results.append(dict(zip(columns, row)))
+        return results
