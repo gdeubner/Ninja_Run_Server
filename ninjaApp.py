@@ -458,3 +458,25 @@ async def show_route_table3():
         for row in cur.fetchall():
             results.append(dict(zip(columns, row)))
         return results
+
+
+@app.get("/show_follow_count/")
+async def show_follow_count():
+        query = 'SELECT username as name, COUNT(username) as value FROM Follow GROUP BY username ORDER BY COUNT(username) DESC;'
+        cur.execute(query)
+        columns = [column[0] for column in cur.description]
+        results = []
+        for row in cur.fetchall():
+            results.append(dict(zip(columns, row)))
+        return results
+
+
+@app.get("/show_follow_count2/")
+async def show_follow_count2():
+        query = 'SELECT follow_username as name, COUNT(follow_username) as value FROM Follow GROUP BY follow_username ORDER BY COUNT(follow_username) DESC;'
+        cur.execute(query)
+        columns = [column[0] for column in cur.description]
+        results = []
+        for row in cur.fetchall():
+            results.append(dict(zip(columns, row)))
+        return results
