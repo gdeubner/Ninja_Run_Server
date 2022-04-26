@@ -461,7 +461,7 @@ async def show_route_table3():
 
 @app.get("/top10_point/")
 async def top10_point():
-    query = 'Select username, points From User order by points desc limit 10;'
+    query = 'Select username as name, points as value From User order by points desc limit 10;'
     cur.execute(query)
     columns = [column[0] for column in cur.description]
     results = []
@@ -471,7 +471,7 @@ async def top10_point():
 
 @app.get("/top10_total_distance/")
 async def top10_point():
-    query = 'Select username, total_distance From User order by total_distance desc limit 10;'
+    query = 'Select username as name, total_distance as value From User order by total_distance desc limit 10;'
     cur.execute(query)
     columns = [column[0] for column in cur.description]
     results = []
@@ -482,7 +482,7 @@ async def top10_point():
 
 @app.get("/top10_total_calories/")
 async def top10_point():
-    query = 'Select username, total_calories From User order by total_calories desc limit 10;'
+    query = 'Select username as name, total_calories as value From User order by total_calories desc limit 10;'
     cur.execute(query)
     columns = [column[0] for column in cur.description]
     results = []
