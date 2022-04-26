@@ -376,7 +376,7 @@ async def deactivate(username:str,password:str):
         return "Username and Password do not match"
     active_status = [r[0] for r in result]
     print(active_status)
-    if active_status == "0":
+    if active_status[0] == 0:
         return "Account is already deactive"
     user_id =[r[0] for r in result]
     print(user_id[0])
@@ -394,7 +394,7 @@ async def deactivate(username:str,password:str):
     except mariadb.Error as e:
         print(f"Error: {e}")
         return "fail"
-    return "success"
+    return "Account Deactivated"
 
 @app.get("/show_follower_table/")
 async def show_follower_table():
@@ -425,7 +425,7 @@ async def activate(username:str,password:str):
         return "Username and Password do not match"
     active_status = [r[0] for r in result]
     print(active_status)
-    if active_status == True:
+    if active_status[0] == 1:
         return "Account is already Active"
     query = ('Update User set active = 1 where username = "'+username+ '";')
     try:
@@ -434,7 +434,7 @@ async def activate(username:str,password:str):
     except mariadb.Error as e:
         print(f"Error: {e}")
         return "fail"
-    return "success"
+    return "Account Activated"
 
 
 @app.get("/show_route_table2/")
@@ -458,3 +458,35 @@ async def show_route_table3():
         for row in cur.fetchall():
             results.append(dict(zip(columns, row)))
         return results
+
+@app.get("/top10_point/")
+async def top10_point():
+    query = 'Select username, point From User order by points desc limit 10;'
+    cur.execute(query)
+    columns = [column[0] for column in cur.description]
+    results = []
+    for row in cur.fetchall():
+        results.append(dict(zip(columns, row)))
+    return results
+
+@app.get("/top10_total_distance/")
+async def top10_point():
+    query = 'Select username, total_distance From User order by total_distance desc limit 10;'
+    cur.execute(query)
+    columns = [column[0] for column in cur.description]
+    results = []
+    for row in cur.fetchall():
+        results.append(dict(zip(columns, row)))
+    return results
+
+
+@app.get("/top10_total_calories/")
+async def top10_point():
+    query = 'Select username, total_calories From User order by total_calories desc limit 10;'
+    cur.execute(query)
+    columns = [column[0] for column in cur.description]
+    results = []
+    for row in cur.fetchall():
+        results.append(dict(zip(columns, row)))
+    return results
+
