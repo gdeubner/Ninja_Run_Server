@@ -30,11 +30,13 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+#Test endpoint to see if we can connect to database
 @app.get("/test/")
 async def test():
     cur.execute('DESCRIBE User;')
     return list(cur)
 
+#Updates users distance ran and calories burned on their profile
 @app.get("/update_user/")
 async def update_user(var_uid: int, var_dist: float,var_cal: int):    
     query = ('UPDATE User' + 
@@ -53,6 +55,7 @@ async def update_user(var_uid: int, var_dist: float,var_cal: int):
         return "fail"
     return "success"
 
+#Inserts a new route into the database
 @app.post("/send_route")
 async def send_route(var_lat_start: float, var_long_start: float, var_lat_end: float, var_long_end: float, var_town: str, var_dist: float, var_uid: int, var_title: str, var_date: str, var_elevation: float, var_routf: str = Body(...)):
     query = ('INSERT INTO Routes' +
@@ -73,6 +76,7 @@ async def send_route(var_lat_start: float, var_long_start: float, var_lat_end: f
     results = list(cur)
     return results
 
+#Retrieves user profile information as well as their route history
 @app.get("/user_info/")
 async def user_info(username: str):
     query = ('SELECT * FROM User u' + 
@@ -93,6 +97,7 @@ async def user_info(username: str):
     res = {"user":results2,"history":results}
     return res
 
+#Endpoint to register a new user and insert their information into the database
 @app.get("/new_user/")
 async def new_user(var_un: str, var_pw: str, var_lb: float, var_ft: int, var_in: float, var_pts: int, var_cals: int, var_dist: float,var_nam: str, var_adm: int):
     query = ('INSERT INTO User ' +
@@ -107,6 +112,7 @@ async def new_user(var_un: str, var_pw: str, var_lb: float, var_ft: int, var_in:
         return "fail"
     return "success"
 
+#Gets user statistics from user table in database
 @app.get("/user_stats/")
 async def user_stats(user_id: int):
     cur.execute('SELECT * FROM User ' + 
@@ -117,6 +123,7 @@ async def user_stats(user_id: int):
         results.update(dict(zip(columns,row)))
     return results
 
+#Retrieves user information to ensure their credentials are correct to login
 @app.get("/user_login/")
 async def user_login(username: str,password: str):
     cur.execute('SELECT user_id FROM User ' + 
@@ -124,6 +131,7 @@ async def user_login(username: str,password: str):
     results = list(cur)
     return results 
   
+#Registers a new user and inserts their information into the database
 @app.get("/register_user/")
 async def register_user(var_un: str, var_pw: str, var_lb: float, var_ft: int, var_in: float, var_nam: str):
     query = ('INSERT INTO User ' +
@@ -140,7 +148,7 @@ async def register_user(var_un: str, var_pw: str, var_lb: float, var_ft: int, va
     results = list(cur)
     return results 
 
-
+#Updates user profile information, if no info is provided information is kept the same
 @app.get("/update_userprofile/")
 async def update_userprofile(user_id:int, username:str, password:str, weight:float, height_ft:int, height_in:float, name:str):
     query = ('UPDATE User SET username = "'+username+'", password = "'+password
@@ -154,8 +162,7 @@ async def update_userprofile(user_id:int, username:str, password:str, weight:flo
         return "fail"
     return "success"
 
-
-
+#Shows all routes created by a user
 @app.get("/route_info/")
 async def route_info(user_id : int):
     query = ('SELECT * FROM Routes ' + 
@@ -167,6 +174,7 @@ async def route_info(user_id : int):
         results.append(dict(zip(columns,row)))
     return results
 
+#Shows all routes shared with a user in the database
 @app.get("/shared_routes/")
 async def shared_routes(user_id : int):
     query = ('SELECT r.route_id,r.title,r.town,r.distance,s.username FROM Routes r ' + 
@@ -178,6 +186,7 @@ async def shared_routes(user_id : int):
         results.append(dict(zip(columns,row)))
     return results
 
+#Shows route history for a given user
 @app.get("/route_history/")
 async def route_history(user_id : int):
     query = ('SELECT h.route_id,h.datetime,h.calories,h.duration,h.distance,r.town,r.title FROM History h LEFT JOIN Routes r ON r.route_id = h.route_id WHERE h.user_id = ' + str(user_id) + ';')
@@ -190,6 +199,7 @@ async def route_history(user_id : int):
     return results
 
 
+#Adds route information into history table when user completes a route
 @app.get("/add_history/")
 async def add_history(user_id:int, datetime:str, calories:int, duration:int, distance:float,route_id:int):
     query = ('INSERT INTO History'+
@@ -203,6 +213,7 @@ async def add_history(user_id:int, datetime:str, calories:int, duration:int, dis
         return "fail"
     return "success"
   
+#Shows routes shared with a user
 @app.get("/share_route")
 async def share_route(user_id: int, shared_username: str, route_id: int):
     query1 = ('SELECT * FROM User WHERE username = "' + shared_username + '";')
@@ -229,6 +240,7 @@ async def share_route(user_id: int, shared_username: str, route_id: int):
         return "fail"
     return "success"
 
+#Adds a new relationship between users, where user A is followed by user B
 @app.get("/add_follow/")
 async def add_follow(user_id:int,username:str,follow_username:str):
     cur.execute('SELECT user_id FROM User ' +
@@ -250,7 +262,7 @@ async def add_follow(user_id:int,username:str,follow_username:str):
         return "fail"
     return "success"
  
-
+#Shows users that follow a given user
 @app.get("/show_followinglist/")
 async def show_followinglist(user_id: int):
     cur.execute('SELECT follow_username, follow_id FROM Follow WHERE user_id = ' + str(user_id) + ';')
@@ -260,6 +272,7 @@ async def show_followinglist(user_id: int):
         results.append(dict(zip(columns,row)))
     return results
 
+#Shows a users followers
 @app.get("/show_followerlist/")
 async def show_followerlist(user_id: int):
     cur.execute('SELECT username, user_id FROM Follow WHERE follow_id = ' + str(user_id) + ';')
@@ -269,7 +282,7 @@ async def show_followerlist(user_id: int):
         results.append(dict(zip(columns,row)))
     return results
 
-
+#Removes a following relationship between two users
 @app.get("/delete_follow/")
 async def delete_follow(user_id:int, follow_id: int):
     query = ('DELETE FROM Follow WHERE user_id = '
@@ -282,6 +295,7 @@ async def delete_follow(user_id:int, follow_id: int):
         return "fail"
     return "success"
 
+#Shows all routes created by a user
 @app.get("/user_routes/")
 async def user_routes(user_id: int):
     cur.execute('SELECT route_id, town, distance  FROM Routes WHERE deleted = 0 AND user_id = ' + str(user_id) + ';')
@@ -291,7 +305,7 @@ async def user_routes(user_id: int):
         results.append(dict(zip(columns,row)))
     return results
 
-
+#Gets information about a specific route
 @app.get("/get_route/")
 async def get_route(route_id:int):
     query = f'SELECT * from Routes where route_id = {route_id};'
@@ -311,6 +325,7 @@ async def get_route(route_id:int):
     res = {"user":results2,"route":results}
     return res
 
+#Deletes a route from routes that are shared to the user
 @app.get("/delete_shared/")
 async def delete_shared(route_id:int,user_id: int):
     query = f'DELETE FROM Shared WHERE route_id = {route_id} AND shared_id = {user_id};'
@@ -319,6 +334,7 @@ async def delete_shared(route_id:int,user_id: int):
 
     return "success"
 
+#Deletes a route from the route table
 @app.get("/delete_route/")
 async def delete_route(route_id:int):
     query = f'UPDATE Routes set deleted=1 WHERE route_id = {route_id};'
@@ -327,6 +343,7 @@ async def delete_route(route_id:int):
 
     return "success"
 
+#Updates a users total points for their profile
 @app.get("/update_points/")
 async def update_points(points:int,user_id: int, dist: float,cals: int):
     query = f'UPDATE User SET points = points + {points}, total_distance = total_distance + {dist}, total_calories = total_calories + {cals} WHERE user_id = {user_id};'
@@ -335,7 +352,7 @@ async def update_points(points:int,user_id: int, dist: float,cals: int):
 
     return "success"
 
-
+#Searches for a route based on various parameters
 @app.get("/search_routes/")
 async def search_routes(search_by:str, search_param):
     if (search_by == "route_id"):
@@ -357,7 +374,7 @@ async def search_routes(search_by:str, search_param):
 
     return results
 
-
+#Retrieves information abotu all users for admin
 @app.get("/admin_user/")
 async def admin_user():
     query = 'SELECT * FROM User;'
@@ -368,6 +385,7 @@ async def admin_user():
         results.append(dict(zip(columns,row)))
     return results
   
+#Deactivates a users account if they exist in the database
 @app.get("/deactivate/")
 async def deactivate(username:str,password:str):
     cur.execute('SELECT active FROM User WHERE username = "' + username +'" and password = "'+password +'";')
@@ -376,7 +394,7 @@ async def deactivate(username:str,password:str):
         return "Username and Password do not match"
     active_status = [r[0] for r in result]
     print(active_status)
-    if active_status == "0":
+    if active_status[0] == 0:
         return "Account is already deactive"
     user_id =[r[0] for r in result]
     print(user_id[0])
@@ -394,8 +412,9 @@ async def deactivate(username:str,password:str):
     except mariadb.Error as e:
         print(f"Error: {e}")
         return "fail"
-    return "success"
+    return "Account Deactivated"
 
+#Shows a list of all information in the follower table
 @app.get("/show_follower_table/")
 async def show_follower_table():
         query = f'Select * from Follow;'
@@ -406,6 +425,7 @@ async def show_follower_table():
             results.append(dict(zip(columns, row)))
         return results
 
+#Shows a list of route information from routes table
 @app.get("/show_route_table/")
 async def show_follower_table():
         query = f'Select route_id, town, distance from Routes;'
@@ -416,7 +436,7 @@ async def show_follower_table():
             results.append(dict(zip(columns, row)))
         return results
 
-  
+#Activates a users account if they exist and are currently deactivated
 @app.get("/activate/")
 async def activate(username:str,password:str):
     cur.execute('SELECT active FROM User WHERE username = "' + username +'" and password = "'+password +'" ;')
@@ -425,7 +445,7 @@ async def activate(username:str,password:str):
         return "Username and Password do not match"
     active_status = [r[0] for r in result]
     print(active_status)
-    if active_status == True:
+    if active_status[0] == 1:
         return "Account is already Active"
     query = ('Update User set active = 1 where username = "'+username+ '";')
     try:
@@ -434,5 +454,81 @@ async def activate(username:str,password:str):
     except mariadb.Error as e:
         print(f"Error: {e}")
         return "fail"
-    return "success"
+    return "Account Activated"
 
+#Gets graphical data for routes showcasing which towns have the most routes run in them
+@app.get("/show_route_table2/")
+async def show_route_table2():
+        query = f'Select town as name, ROUND(COUNT(distance),2) as value from Routes GROUP BY town ORDER BY COUNT(distance) DESC;'
+        cur.execute(query)
+        columns = [column[0] for column in cur.description]
+        results = []
+        for row in cur.fetchall():
+            results.append(dict(zip(columns, row)))
+        return results
+
+#Gets graphical data for routes showcasing which towns have the most distance ran
+@app.get("/show_route_table3/")
+async def show_route_table3():
+        query = f'Select town as name, ROUND(SUM(distance),2) as value from Routes GROUP BY town ORDER BY SUM(distance) DESC;'
+        cur.execute(query)
+        columns = [column[0] for column in cur.description]
+        results = []
+        for row in cur.fetchall():
+            results.append(dict(zip(columns, row)))
+        return results
+
+#Gets graphical data showcasing users who have the most followers
+@app.get("/show_follow_count/")
+async def show_follow_count():
+        query = 'SELECT username as name, COUNT(username) as value FROM Follow GROUP BY username ORDER BY COUNT(username) DESC;'
+        cur.execute(query)
+        columns = [column[0] for column in cur.description]
+        results = []
+        for row in cur.fetchall():
+            results.append(dict(zip(columns, row)))
+        return results
+
+#Gets graphical data showcasing users who follow the most people
+@app.get("/show_follow_count2/")
+async def show_follow_count2():
+        query = 'SELECT follow_username as name, COUNT(follow_username) as value FROM Follow GROUP BY follow_username ORDER BY COUNT(follow_username) DESC;'
+        cur.execute(query)
+        columns = [column[0] for column in cur.description]
+        results = []
+        for row in cur.fetchall():
+            results.append(dict(zip(columns, row)))
+        return results
+
+#Shows users with the most total_points
+@app.get("/top10_point/")
+async def top10_point():
+    query = 'Select username as name, points as value From User order by points desc limit 10;'
+    cur.execute(query)
+    columns = [column[0] for column in cur.description]
+    results = []
+    for row in cur.fetchall():
+        results.append(dict(zip(columns, row)))
+    return results
+
+#Shows users with the most distance ran altogether
+@app.get("/top10_total_distance/")
+async def top10_point():
+    query = 'Select username as name, total_distance as value From User order by total_distance desc limit 10;'
+    cur.execute(query)
+    columns = [column[0] for column in cur.description]
+    results = []
+    for row in cur.fetchall():
+        results.append(dict(zip(columns, row)))
+    return results
+
+#Shows users with the most calories burned
+@app.get("/top10_total_calories/")
+async def top10_point():
+    query = 'Select username as name, total_calories as value From User order by total_calories desc limit 10;'
+    cur.execute(query)
+    columns = [column[0] for column in cur.description]
+    results = []
+    for row in cur.fetchall():
+        results.append(dict(zip(columns, row)))
+    return results
