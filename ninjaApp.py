@@ -54,13 +54,13 @@ async def update_user(var_uid: int, var_dist: float,var_cal: int):
     return "success"
 
 @app.post("/send_route")
-async def send_route(var_lat_start: float, var_long_start: float, var_lat_end: float, var_long_end: float, var_town: str, var_dist: float, var_uid: int, var_title: str, var_date: str, var_routf: str = Body(...)):
+async def send_route(var_lat_start: float, var_long_start: float, var_lat_end: float, var_long_end: float, var_town: str, var_dist: float, var_uid: int, var_title: str, var_date: str, var_elevation: float, var_routf: str = Body(...)):
     query = ('INSERT INTO Routes' +
-                ' (town,distance,user_id,lat_start,long_start,lat_end,long_end,route_f,title,date)' +
+                ' (town,distance,user_id,lat_start,long_start,lat_end,long_end,route_f,title,date,elevation)' +
                 ' VALUES' + 
                 ' ("' + var_town + '",' + str(var_dist) +  ',' + str(var_uid) + ',' + str(var_lat_start)
              + ',' + str(var_long_start) + ',' + str(var_lat_end) + ',' + str(var_long_end) + ',"'
-             + var_routf + '","' + var_title + '","' + var_date + '");')
+             + var_routf + '","' + var_title + '","' + var_date + '","' + str(var_elevation) + '");')
     cur.execute(query)
     try:
         conn.commit()
@@ -284,7 +284,7 @@ async def delete_follow(user_id:int, follow_id: int):
 
 @app.get("/user_routes/")
 async def user_routes(user_id: int):
-    cur.execute('SELECT route_id, town, distance  FROM Routes WHERE user_id = ' + str(user_id) + ';')
+    cur.execute('SELECT route_id, town, distance  FROM Routes WHERE deleted = 0 AND user_id = ' + str(user_id) + ';')
     columns = [column[0] for column in cur.description]
     results = []
     for row in cur.fetchall():
@@ -321,7 +321,7 @@ async def delete_shared(route_id:int,user_id: int):
 
 @app.get("/delete_route/")
 async def delete_route(route_id:int):
-    query = f'UPDATE Routes set user_id=-1 WHERE route_id = {route_id};'
+    query = f'UPDATE Routes set deleted=1 WHERE route_id = {route_id};'
     cur.execute(query)
     conn.commit()
 
