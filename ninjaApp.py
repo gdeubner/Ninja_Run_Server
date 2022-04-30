@@ -177,7 +177,7 @@ async def route_info(user_id : int):
 #Shows all routes shared with a user in the database
 @app.get("/shared_routes/")
 async def shared_routes(user_id : int):
-    query = ('SELECT r.route_id,r.title,r.town,r.distance,s.username FROM Routes r ' + 
+    query = ('SELECT r.*,s.username FROM Routes r ' + 
             'LEFT JOIN Shared s ON s.route_id = r.route_id WHERE s.shared_id = ' + str(user_id) + ';')
     cur.execute(query)
     columns = [column[0] for column in cur.description]
@@ -298,7 +298,7 @@ async def delete_follow(user_id:int, follow_id: int):
 #Shows all routes created by a user
 @app.get("/user_routes/")
 async def user_routes(user_id: int):
-    cur.execute('SELECT route_id, town, distance  FROM Routes WHERE deleted = 0 AND user_id = ' + str(user_id) + ';')
+    cur.execute('SELECT Routes.*, User.username from Routes left join User on Routes.user_id = User.user_id WHERE Routes.deleted = 0 AND Routes.user_id = ' + str(user_id) + ';')
     columns = [column[0] for column in cur.description]
     results = []
     for row in cur.fetchall():
